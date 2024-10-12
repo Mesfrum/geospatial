@@ -1,8 +1,7 @@
 from fastapi import FastAPI, Request, HTTPException
-from utils import is_valid_coordinate
+from utils import is_valid_coordinate, fetch_distance_matrix
 
 app = FastAPI()
-
 
 @app.get("/")
 async def read_root():
@@ -38,9 +37,13 @@ async def handle_routes(request: Request):
                 status_code=400, detail=f"Invalid coordinate at index {i}: {coord}"
             )
 
-    # Step 5: Return success response
+    matrix = fetch_distance_matrix(coordinates=coords)
+    if(not matrix) :
+        raise HTTPException(
+            status_code=400, detail="Something went wrong"
+        )
+
     return {
         "status": "ok",
-        "error": False,
-        "route_distance": "Dummy distance: 1000 km",
+        "response": matrix,
     }
